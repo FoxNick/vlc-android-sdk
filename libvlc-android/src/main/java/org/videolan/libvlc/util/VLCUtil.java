@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import io.github.pixee.security.BoundedLineReader;
 
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
@@ -130,7 +131,7 @@ public class VLCUtil {
             fileReader = new FileReader("/proc/cpuinfo");
             br = new BufferedReader(fileReader);
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = BoundedLineReader.readLine(br, 5_000_000)) != null) {
                 if (line.contains("AArch64")) {
                     hasArmV7 = true;
                     hasArmV6 = true; /* Armv8 is backwards compatible to < v7 */
@@ -234,7 +235,7 @@ public class VLCUtil {
         try {
             fileReader = new FileReader("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
             br = new BufferedReader(fileReader);
-            line = br.readLine();
+            line = BoundedLineReader.readLine(br, 5_000_000);
             if (line != null)
                 frequency = Float.parseFloat(line) / 1000.f; /* Convert to MHz */
         } catch (IOException ex) {
